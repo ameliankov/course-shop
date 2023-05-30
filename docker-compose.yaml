@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    depends_on:
+      - nginx-course-shop
+      - database-course-shop
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www/src
+    volumes:
+      - ./:/var/www
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+  nginx-course-shop:
+    image: nginx:alpine
+    container_name: nginx-course-shop
+    restart: unless-stopped
+    tty: true
+    ports:
+      - '8081:80'
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - app-network
+
+  database-course-shop:
+    container_name: database-course-shop
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: course-shop
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./docker/tmp/db:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

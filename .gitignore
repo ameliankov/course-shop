@@ -1,0 +1,6 @@
+.idea
+.cache
+.config
+.local
+/docker/tmp/
+.bash_history
